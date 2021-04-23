@@ -7,6 +7,9 @@ namespace SpriteKind {
     export const superEnemy = SpriteKind.create()
     export const bigBlast = SpriteKind.create()
 }
+namespace StatusBarKind {
+    export const power = StatusBarKind.create()
+}
 sprites.onOverlap(SpriteKind.superEnemy, SpriteKind.Projectile, function (sprite, otherSprite) {
     otherSprite.destroy()
     alien = sprites.create(img`
@@ -33,55 +36,62 @@ sprites.onOverlap(SpriteKind.superEnemy, SpriteKind.Projectile, function (sprite
     list.push(alien)
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    bigLaser = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . 2 2 2 . . . . . . . . 
-        . . . . 2 2 2 2 2 . . . . . . . 
-        . . . 2 2 4 4 4 2 2 . . . . . . 
-        . . 2 2 4 4 5 4 4 2 2 . . . . . 
-        . . 2 2 4 5 5 5 4 2 2 . . . . . 
-        . . 2 2 4 4 5 4 4 2 2 . . . . . 
-        . . . 2 2 4 4 4 2 2 . . . . . . 
-        . . . . 2 2 2 2 2 . . . . . . . 
-        . . . . . 2 2 2 . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.bigBlast)
-    bigLaser.setPosition(ship.x, ship.y)
-    bigLaser.vy += -25
+    if (statusbar.value >= 30) {
+        bigLaser = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . 2 2 2 . . . . . . . . 
+            . . . . 2 2 2 2 2 . . . . . . . 
+            . . . 2 2 4 4 4 2 2 . . . . . . 
+            . . 2 2 4 4 5 4 4 2 2 . . . . . 
+            . . 2 2 4 5 5 5 4 2 2 . . . . . 
+            . . 2 2 4 4 5 4 4 2 2 . . . . . 
+            . . . 2 2 4 4 4 2 2 . . . . . . 
+            . . . . 2 2 2 2 2 . . . . . . . 
+            . . . . . 2 2 2 . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.bigBlast)
+        bigLaser.setPosition(ship.x, ship.y)
+        bigLaser.vy += -25
+        statusbar.value += -30
+    }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.enemyProjectile, function (sprite, otherSprite) {
     otherSprite.destroy()
     info.changeLifeBy(-1)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    laser = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . 5 . . . . . . . . 
-        . . . . . . . 5 . . . . . . . . 
-        . . . . . . . 5 . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.Projectile)
-    laser.setPosition(ship.x, ship.y)
-    laser.vy += -25
+    if (statusbar.value >= 10) {
+        laser = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 5 . . . . . . . . 
+            . . . . . . . 5 . . . . . . . . 
+            . . . . . . . 5 . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.Projectile)
+        laser.setPosition(ship.x, ship.y)
+        laser.vy += -25
+        statusbar.value += -10
+    }
 })
 sprites.onOverlap(SpriteKind.power, SpriteKind.Player, function (sprite, otherSprite) {
     sprite.destroy()
+    statusbar.value += 10
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Projectile, function (sprite, otherSprite) {
     otherSprite.destroy()
@@ -330,10 +340,18 @@ let bigLaser: Sprite = null
 let alien: Sprite = null
 let list: Sprite[] = []
 let ship: Sprite = null
+let statusbar: StatusBarSprite = null
 scene.setBackgroundColor(12)
 game.splash("Pilot, you charge is low.", "We found energy nearby...")
 game.splash("But it's guarded by a", "swarm of hostiles.")
-game.splash("Your power will be mostly")
+game.splash("Your power will be mostly", "spent fighting them.")
+game.splash("This is your first combat", "run. Here are the basics:")
+game.splash("A launches a regular pulse", "B shoots a big blast")
+game.splash("Most will go down with a", "a single pulse...")
+statusbar = statusbars.create(5, 50, StatusBarKind.power)
+statusbar.setColor(8, 2)
+statusbar.positionDirection(CollisionDirection.Left)
+statusbar.setOffsetPadding(0, 2)
 info.setLife(3)
 ship = sprites.create(img`
     ................................
@@ -371,6 +389,7 @@ ship = sprites.create(img`
     `, SpriteKind.Player)
 ship.setStayInScreen(true)
 list = []
+let pulse = true
 game.onUpdateInterval(5000, function () {
     power2 = sprites.create(img`
         . . . . . . . . . . . . . . . . 
