@@ -349,8 +349,8 @@ let list: Sprite[] = []
 let ship: Sprite = null
 let statusbar: StatusBarSprite = null
 scene.setBackgroundColor(12)
-game.splash("Pilot, you charge is low.", "We found energy nearby...")
-game.splash("But it's guarded by a", "swarm of hostiles.")
+game.splash("Owl-16, your power is low.", "We found energy nearby...")
+game.splash("but it's guarded by a", "swarm of hostiles.")
 game.splash("Your power will be mostly", "spent fighting them.")
 game.splash("This is your first combat", "run. Here are the basics:")
 game.splash("A launches a regular pulse", "B shoots a big blast")
