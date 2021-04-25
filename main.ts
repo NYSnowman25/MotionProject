@@ -6,6 +6,7 @@ namespace SpriteKind {
     export const superDuperEnemy = SpriteKind.create()
     export const superEnemy = SpriteKind.create()
     export const bigBlast = SpriteKind.create()
+    export const superLaser = SpriteKind.create()
 }
 namespace StatusBarKind {
     export const power = StatusBarKind.create()
@@ -62,6 +63,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.enemyProjectile, function (sprite, otherSprite) {
     otherSprite.destroy()
+    info.changeScoreBy(-1)
     info.changeLifeBy(-1)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -135,6 +137,9 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.Projectile, function (sprite, oth
     pause(500)
     explosion.destroy()
     list.removeAt(list.indexOf(sprite))
+})
+info.onCountdownEnd(function () {
+    game.over(true, effects.starField)
 })
 sprites.onOverlap(SpriteKind.bigBlast, SpriteKind.superEnemy, function (sprite, otherSprite) {
     sprite.destroy()
@@ -266,6 +271,7 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.bigBlast, function (sprite, other
     list.removeAt(list.indexOf(sprite))
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.boom, function (sprite, otherSprite) {
+    info.changeScoreBy(-3)
     info.changeLifeBy(-3)
 })
 info.onLifeZero(function () {
@@ -333,6 +339,7 @@ sprites.onOverlap(SpriteKind.superDuperEnemy, SpriteKind.Projectile, function (s
 })
 let megaAlien: Sprite = null
 let power2: Sprite = null
+let enemyLaser: Sprite = null
 let superAlien: Sprite = null
 let explosion: Sprite = null
 let laser: Sprite = null
@@ -348,25 +355,27 @@ game.splash("Your power will be mostly", "spent fighting them.")
 game.splash("This is your first combat", "run. Here are the basics:")
 game.splash("A launches a regular pulse", "B shoots a big blast")
 game.splash("Most go down with one pulse,", "but some are shielded.")
-game.splash("Yellow shields need two", "Red shields take three")
-game.splash("All go down with", "one big blast")
-game.splash("")
+game.splash("Yellow shields need two.", "Red shields take three.")
+game.splash("All go down with", "one big blast.")
+game.splash("Which reminds me, both", "attacks cost energy.")
+game.splash("Pulses use one cell.", "Blasts use three cells.")
+game.splash("No power, no attacking.")
+game.splash("Also, getting hit", "will drop your score.")
+game.splash("1 life lost = -1 score")
+game.splash("You got all that?", "Good.")
+game.splash("Computer says we arrive", "in T-2_minutes.")
+game.splash("Stay alive, pilot.", "We'll be there soon.")
 statusbar = statusbars.create(5, 50, StatusBarKind.power)
 statusbar.setColor(8, 2)
 statusbar.positionDirection(CollisionDirection.Left)
 statusbar.setOffsetPadding(0, 2)
+info.startCountdown(120)
 info.setLife(3)
 ship = sprites.create(img`
     ................................
     ................................
     ................................
     ................................
-    ........77......................
-    .......7777.....................
-    ......777777....................
-    ......777777....................
-    .......7777.....................
-    ........77......................
     ................................
     ................................
     ................................
@@ -374,46 +383,31 @@ ship = sprites.create(img`
     ................................
     ................................
     ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
-    ................................
+    ..............bb................
+    ...........3.bbbb.3.............
+    ...........3bb11bb3.............
+    ...........3bbbbbb3.............
+    ...........3bbbbbb3.............
+    ...........bbbddbbb.............
+    ..........bbbddddbbb............
+    ..........bbdfdfffbb............
+    ..........bbdfdfddbb............
+    ..........bbdfdfffbb............
+    ..........bbdfdfdfbb............
+    ..........bbdfdfffbb............
+    ..........bbbbbbbbbb............
+    ...........bbbbbbbb.............
+    ...........eee..eee.............
+    ...........e4e..e4e.............
+    ............2....2..............
+    ............2....2..............
     ................................
     ................................
     ................................
     `, SpriteKind.Player)
 ship.setStayInScreen(true)
 list = []
-let pulse = true
 game.onUpdateInterval(5000, function () {
-    power2 = sprites.create(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . 1 3 1 . . . . . . . 
-        . . . . . 1 1 3 1 1 . . . . . . 
-        . . . . 1 1 3 1 3 1 1 . . . . . 
-        . . . . 3 3 1 3 1 3 3 . . . . . 
-        . . . . 1 1 3 1 3 1 1 . . . . . 
-        . . . . . 1 1 3 1 1 . . . . . . 
-        . . . . . . 1 3 1 . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, SpriteKind.power)
-    power2.x = randint(16, scene.screenWidth() - 16)
-    power2.y = randint(75, scene.screenHeight() - 20)
     alien = sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -437,13 +431,56 @@ game.onUpdateInterval(5000, function () {
     list.push(alien)
 })
 game.onUpdateInterval(2000, function () {
-	
+    for (let value of list) {
+        enemyLaser = sprites.create(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 9 . . . . . . . . 
+            . . . . . . . 9 . . . . . . . . 
+            . . . . . . . 9 . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.enemyProjectile)
+        enemyLaser.setPosition(value.x, value.y)
+        enemyLaser.vy += 25
+    }
+})
+game.onUpdateInterval(2000, function () {
+    power2 = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . 1 3 1 . . . . . . . 
+        . . . . . 1 1 3 1 1 . . . . . . 
+        . . . . 1 1 3 1 3 1 1 . . . . . 
+        . . . . 3 3 1 3 1 3 3 . . . . . 
+        . . . . 1 1 3 1 3 1 1 . . . . . 
+        . . . . . 1 1 3 1 1 . . . . . . 
+        . . . . . . 1 3 1 . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.power)
+    power2.x = randint(16, scene.screenWidth() - 16)
+    power2.y = randint(75, scene.screenHeight() - 20)
 })
 forever(function () {
     ship.x += controller.dx()
     ship.y += controller.dy()
 })
-game.onUpdateInterval(10000, function () {
+game.onUpdateInterval(20000, function () {
     megaAlien = sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . 2 2 2 2 2 . . . . . . 
