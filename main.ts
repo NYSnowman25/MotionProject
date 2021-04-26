@@ -338,6 +338,7 @@ sprites.onOverlap(SpriteKind.superDuperEnemy, SpriteKind.Projectile, function (s
     list.push(superAlien)
 })
 let megaAlien: Sprite = null
+let enemyLaser: Sprite = null
 let power2: Sprite = null
 let enemyLaser: Sprite = null
 let superAlien: Sprite = null
